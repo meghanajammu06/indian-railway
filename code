@@ -1,0 +1,139 @@
+import dash
+from dash import dcc, html, Input, Output
+import pandas as pd
+import plotly.express as px
+
+# Load the data
+file_path = "Indian_Railway_India_Large_Dashboard.xlsx"
+bar_data = pd.read_excel(file_path, sheet_name="market growth")
+line_data = pd.read_excel(file_path, sheet_name="passenger trends")
+heatmap_data = pd.read_excel(file_path, sheet_name="Network Density")
+
+# App initialization
+app = dash.Dash(__name__)
+app.title = "Indian Railway Performance Dashboard"
+
+# Layout
+app.layout = html.Div(
+    style={"backgroundColor": "#f9f9f9", "fontFamily": "Arial, sans-serif"},
+    children=[
+        # Header
+        html.Div(
+            style={
+                "backgroundColor": "#4CAF50",
+                "color": "white",
+                "padding": "10px",
+                "textAlign": "center",
+            },
+            children=[
+                html.H1("Indian Railway Performance Dashboard"),
+                html.P("Track and analyze passenger trends over time."),
+            ],
+        ),
+
+        # Filters
+        html.Div(
+            style={"padding": "20px"},
+            children=[
+                html.H4("Filter Options", style={"marginBottom": "10px"}),
+                html.Div(
+                    style={"display": "flex", "justifyContent": "space-between", "marginBottom": "20px"},
+                    children=[
+                        # Dropdown for year selection
+                        html.Div(
+                            children=[
+                                html.Label("Select Timeline (Year):"),
+                                dcc.Dropdown(
+                                    id="year-selector",
+                                    options=[
+                                        {"label": str(year), "value": year} for year in sorted(line_data["Year"].unique())
+                                    ],
+                                    multi=True,
+                                    placeholder="Select Year(s)",
+                                    value=[2023],
+                                ),
+                            ],
+                            style={"width": "45%"},
+                        ),
+                        # Dropdown for passenger selection
+                        html.Div(
+                            children=[
+                                html.Label("Select passenger:"),
+                                dcc.Dropdown(
+                                    id="passenger trends-selector",
+                                    options=[
+                                        {"label": passengertrends, "value": passengertrends} for passenger trendsin sorted(line_data["passenger trends"].unique())
+                                    ],
+                                    multi=True,
+                                    placeholder="passengertrends",
+                                    value=["uttar pradesh"],
+                                ),
+                            ],
+                            style={"width": "45%"},
+                        ),
+                    ],
+                ),
+            ],
+        ),
+
+        # Line Graph
+        html.Div(
+            style={"padding": "20px"},
+            children=[
+                html.H4("Flagship Passenger trends Over Years", style={"textAlign": "center"}),
+                dcc.Graph(id="line-chart"),
+            ],
+        ),
+
+        # Bar Chart
+        html.Div(
+            style={"padding": "20px"},
+            children=[
+                html.H4("RevenueDistribution", style={"textAlign": "center"}),
+                dcc.Graph(id="bar-chart"),
+            ],
+        ),
+    ],
+)
+
+# Callbacks for interactivity
+@app.callback(
+    Output("line-chart", "figure"),
+    Output("bar-chart", "figure"),
+    Input("year-selector", "value"),
+    Input("passenger trends-selector", "value"),
+)
+def update_charts(selected_years, selected_passenger trends):
+    # Filter line data
+    filtered_line_data = line_data[
+        (line_data["Year"].isin(selected_years)) & (line_data["passenger"].isin(selected_species))
+    ]
+
+    # Line Chart
+    line_fig = px.line(
+        filtered_line_data,
+        x="Year",
+        y="Population",
+        color="passengertrends",
+        title="Passenger Growth Trends",
+        template="plotly_white",
+    )
+
+    # Filter bar data
+    filtered_bar_data = bar_data[bar_data["revenue Distribution"].isin(selected_species)]
+    bar_fig = px.bar(
+        filtered_bar_data,
+        x="passenger",
+        y="Population",
+        color="Year",
+        barmode="group",
+        title="Passenger Trends",
+        template="plotly_white",
+    )
+
+    return line_fig, bar_fig
+
+
+# Run the app
+if __name__ == "__main__":
+app.run_server(debug=True)
